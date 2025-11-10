@@ -127,6 +127,7 @@ public class App {
 
 		final String srcContent = readAll(src);
 		final String dstContent = readAll(dst);
+		
 
 		final Matcher matcher = LGMatcher.create(srcContent, dstContent, srcTree, dstTree, mapping);
 		matcher.match();

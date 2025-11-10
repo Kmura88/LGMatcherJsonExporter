@@ -1,3 +1,4 @@
 rootProject.name = 'LGMatcherJsonExporter'
 
-includeBuild './LGMatcher'
+include ':LGMatcher'
+project(':LGMatcher').projectDir = file('./LGMatcher')

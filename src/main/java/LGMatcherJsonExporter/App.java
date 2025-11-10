@@ -1,4 +1,4 @@
-package com.github.kusumotolab;
+package LGMatcherJsonExporter;
 
 import java.io.FileWriter;
 import java.io.IOException;

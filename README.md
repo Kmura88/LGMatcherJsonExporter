@@ -6,5 +6,10 @@ ___
 
 LGMatcherSampleを元に作成。
 
-## setup for Eclipse
+## setup
+```
+./gradlew shadowJar
+```
+
+## setup for Eclipse(もう不要)
 eclipse上でパッケージを右クリック -> `プロパティ` -> `javaのビルドパス` -> `プロジェクトタブ` -> LGMatcherを追加。

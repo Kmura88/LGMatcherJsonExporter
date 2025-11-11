@@ -23,11 +23,13 @@ import com.github.kusumotolab.lgmatcher.LGMatcher;
 public class App {
 	
 	private static final MappingStore mapping = new MappingStore();
+	private static String JsonPath = "GumTreedata.json";
 
 	public static void main(final String[] args) throws IOException {
 		final App app = new App();
 		
-		final List<Action> actions = app.calculateEditScript(args[0], args[1]);
+		JsonPath = args[0];
+		final List<Action> actions = app.calculateEditScript(args[1], args[2]);
 		
 		app.SaveDiff(actions);
 	}
@@ -107,7 +109,7 @@ public class App {
 			allActionsArray.put(actionJson);
 		}
 	// --- 3. JSONファイルへの書き出し ---
-		try (FileWriter file = new FileWriter("GumTreedata.json")) {
+		try (FileWriter file = new FileWriter(JsonPath)) {
 			file.write(allActionsArray.toString(4));
 			file.flush();
 		} catch (IOException e) {

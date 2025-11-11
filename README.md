@@ -7,8 +7,15 @@ ___
 LGMatcherSampleを元に作成。
 
 ## setup
+
+jdk17でのみコンパイル可能
 ```
 ./gradlew shadowJar
+```
+
+## how to use 
+```
+java -jar LGMatcherJsonExporter-1.0-all.jar [出力先ファイル] [src] [dst]
 ```
 
 ## setup for Eclipse(もう不要)

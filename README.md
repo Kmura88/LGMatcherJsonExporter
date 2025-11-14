@@ -31,3 +31,33 @@ java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 
 ## setup for Eclipse(もう不要)
 eclipse上でパッケージを右クリック -> `プロパティ` -> `javaのビルドパス` -> `プロジェクトタブ` -> LGMatcherを追加。
+
+<details> <summary> `update`の粒度の向上メモ </summary>
+
+- `update`の粒度が粗いことがあった
+		- 例: `3 + 5`を`3 - 5`に変更すると変えたのは1文字なのに5文字書き換えた判定に
+	- `update`の粒度が粗いと内包・外包の判定に問題が生じる
+	- ~~`update`はASTの葉のノードであるべき~~
+	- ~~`Actions`に保管されるノードが、稀に、葉の親ノードになることがあった~~
+	- LGMatcherを外してGumTree生来のMatcherを利用しても変わらなかった
+		- GumTreeに問題があり
+	- 原因 : InfixExpressionのような、子ノードを持つ&ノード自身に値を持つ ノードは、自身の文字数を子ノードの分まで含む。
+	```
+	Ifstatement
+	└── InfixExpression : <= (このノードは2文字ではなく "w <= num_list[i-1]" の18字扱い)
+		├── SimpleName : w
+		└── ArrayAccess
+			├── SimpleName : num_list
+			└── InfixExpression : -
+				├── SimpleName : i
+				└── NumberLiteral : 1
+	```
+	- どうやら最新のGumTreeでは正確に情報を保管しているが、LGMatcher対応のoldなversionでは各ノードに細かく文字数を保管してない(っぽい。多分。)
+	- 解決策 : UPDATEのみ子ノードの文字数を引く
+		- 親ノードで`[10,25]`で子ノ－ドが`[10,15]`,`[19,25]`のときに`[16,18]`となるようにする
+		- 現状は確認できていないが、親ノードで`[10,25]`で子ノ－ドが`[10,11]`,`[15,16]`,`[19,25]`のように、間に区間補集合が複数(`[12,14]`,`[17,18]`)ある時は前にある方の`[12,14]`となる。
+		- `getTightRange`が対応
+
+</details>
+
+	

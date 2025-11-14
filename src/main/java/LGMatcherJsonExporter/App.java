@@ -154,16 +154,20 @@ public class App {
 				ITree srcNode = i.getNode();
 				ITree dstNode = mapping.getDst(srcNode);
 				
-				actionJson.put("src_pos", srcNode.getPos());
-				actionJson.put("src_end", srcNode.getEndPos());
+				int[] srcRange = getTightRange(srcNode);
+				actionJson.put("src_pos", srcRange[0]);
+				actionJson.put("src_end", srcRange[1]);
 				if (dstNode != null) {
-					actionJson.put("dst_pos", dstNode.getPos());
-					actionJson.put("dst_end", dstNode.getEndPos());
+					int[] dstRange = getTightRange(dstNode);
+					actionJson.put("dst_pos", dstRange[0]);
+					actionJson.put("dst_end", dstRange[1]);
 				} else {
 					actionJson.put("dst_pos", JSONObject.NULL);
 					actionJson.put("dst_end", JSONObject.NULL);
 				}
+				
 			}
+			
 			
 			// 完成したJSONオブジェクトを配列に追加
 			allActionsArray.put(actionJson);
@@ -210,5 +214,51 @@ public class App {
 	private String readAll(final String path) throws IOException {
 		return Files.lines(Paths.get(path), Charset.forName("UTF-8"))
 			.collect(Collectors.joining(System.getProperty("line.separator")));
+	}
+	
+	private int[] getTightRange(ITree node) {
+		int pStart = node.getPos();
+	    int pEnd   = node.getEndPos();
+
+	    List<ITree> children = node.getChildren();
+
+	    // 子が無ければ親の範囲をそのまま返す
+	    if (children.isEmpty()) {
+	        return new int[]{pStart, pEnd};
+	    }
+
+	    // 子ノードの範囲を (start,end) の形で抽出
+	    List<int[]> ranges = children.stream()
+	        .map(c -> new int[]{c.getPos(), c.getEndPos()})
+	        .sorted((a,b) -> Integer.compare(a[0], b[0]))
+	        .collect(Collectors.toList());
+
+	    // 親範囲の "未覆われ部分"（差集合）を探索
+	    int current = pStart;
+
+	    for (int[] r : ranges) {
+	        int cStart = r[0];
+	        int cEnd   = r[1];
+
+	        // 親範囲内でギャップを発見
+	        if (current < cStart) {
+	            int gapStart = current;
+	            int gapEnd   = cStart - 1;
+
+	            // Update の差分は 1つだけ返せば良い
+	            return new int[]{gapStart, gapEnd};
+	        }
+
+	        // 子範囲の後ろに進める
+	        current = Math.max(current, cEnd + 1);
+	    }
+
+	    // 最後の子の後ろにもギャップがある場合
+	    if (current <= pEnd) {
+	        return new int[]{current, pEnd};
+	    }
+
+	    // ギャップが無ければ親範囲全部
+	    return new int[]{pStart, pEnd};
 	}
 }

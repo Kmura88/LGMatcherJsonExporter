@@ -158,7 +158,7 @@ public class App {
 				actionJson.put("src_end", srcNode.getEndPos());
 				if (dstNode != null) {
 					actionJson.put("dst_pos", dstNode.getPos());
-					actionJson.put("dst_end", i.getNode().isLeaf());//dstNode.getEndPos()
+					actionJson.put("dst_end", dstNode.getEndPos());
 				} else {
 					actionJson.put("dst_pos", JSONObject.NULL);
 					actionJson.put("dst_end", JSONObject.NULL);

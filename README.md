@@ -16,12 +16,17 @@ jdk17でのみコンパイル可能
 ## how to use 
 LGMatcherの計算方法で計算
 ```
-java -jar LGMatcherJsonExporter-1.0-all.jar [-LGM] [出力先ファイル] [src] [dst]
+java -jar LGMatcherJsonExporter-1.0-all.jar [-LGM] [出力先ファイル名] [srcPath] [dstPath]
 ```
 
 既存のGumTreeの計算方法で計算
 ```
-java -jar LGMatcherJsonExporter-1.0-all.jar [-M] [出力先ファイル名] [src] [dst]
+java -jar LGMatcherJsonExporter-1.0-all.jar [-M] [出力先ファイル名] [srcPath] [dstPath]
+```
+
+例
+```
+java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 ```
 
 ## setup for Eclipse(もう不要)

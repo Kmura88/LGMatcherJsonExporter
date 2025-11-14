@@ -20,25 +20,85 @@ import com.github.gumtreediff.matchers.Matcher;
 import com.github.gumtreediff.tree.ITree;
 import com.github.kusumotolab.lgmatcher.LGMatcher;
 
+
+
 public class App {
 	
-	private static final MappingStore mapping = new MappingStore();
+	private static final String OPTION_LGM = "-LGM";
+	private static final String OPTION_M   = "-M";
 	private static String JsonPath = "GumTreedata.json";
+	private static String srcPath;
+	private static String dstPath;
 
 	public static void main(final String[] args) throws IOException {
 		final App app = new App();
+		// 引数の数の確認
 		
-		JsonPath = args[0];
-		final List<Action> actions = app.calculateEditScript(args[1], args[2]);
+		if(args.length<4) {
+			System.out.println("Syntax Error");
+			return;
+		}
 		
-		app.SaveDiff(actions);
+		//引数の値の確認
+		if(!(args[0].equals(OPTION_LGM) || args[0].equals(OPTION_M))) {
+			System.out.println("Syntax Error");
+			return;
+		}
+		app.run(args);
 	}
 
 	public App() {
 		Run.initGenerators();
 	}
+	
+	public void run(final String[] args){
+		
+		//1. 引数の格納
+		JsonPath = args[1];
+		srcPath = args[2];
+		dstPath = args[3];
+		ITree srcTree = null;
+		ITree dstTree = null;
+		try {
+			srcTree = getITree(srcPath);
+			dstTree = getITree(dstPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		// 2.MappingとActionの計算
+		List<Action> actions = null;
+		MappingStore mapping = null;
+		
+		
+		if(args[0].equals(OPTION_LGM)){
+			//LGMatcherを使ってmapping計算
+			
+			String srcContent="";
+			String dstContent="";
+			
+			try {
+				srcContent = readAll(srcPath);
+				dstContent = readAll(dstPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			mapping = calculateMapping_LGMatcher(srcTree, dstTree, srcContent, dstContent);
+			
+		}else if(args[0].equals(OPTION_M)) {
+			//既存のMatcherでmapping計算
+			mapping = calculateMapping_orginal(srcTree, dstTree);
+			
+		}
+		
+		actions = calculateEditScript(srcTree, dstTree, mapping);
+		
+		//3. json出力
+		SaveJsonDiff(actions, mapping);
+	}
   
-	public void SaveDiff(final List<Action> actions) throws IOException {
+	public void SaveJsonDiff(final List<Action> actions, final MappingStore mapping){
 	  	JSONArray allActionsArray = new JSONArray();
 	  
 	  	for (Action i : actions) {
@@ -98,7 +158,7 @@ public class App {
 				actionJson.put("src_end", srcNode.getEndPos());
 				if (dstNode != null) {
 					actionJson.put("dst_pos", dstNode.getPos());
-					actionJson.put("dst_end", dstNode.getEndPos());
+					actionJson.put("dst_end", i.getNode().isLeaf());//dstNode.getEndPos()
 				} else {
 					actionJson.put("dst_pos", JSONObject.NULL);
 					actionJson.put("dst_end", JSONObject.NULL);
@@ -112,33 +172,40 @@ public class App {
 		try (FileWriter file = new FileWriter(JsonPath)) {
 			file.write(allActionsArray.toString(4));
 			file.flush();
+			System.out.println("Successfully wrote action data to .json");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println("Successfully wrote action data to GumTreedata.json");
 	}
 
-	public List<Action> calculateEditScript(final String src, final String dst) throws IOException {
-		final ITree srcTree = Generators.getInstance()
-			.getTree(src)
-			.getRoot();
-		final ITree dstTree = Generators.getInstance()
-			.getTree(dst)
-			.getRoot();
-
-		final String srcContent = readAll(src);
-		final String dstContent = readAll(dst);
-		
-
-		final Matcher matcher = LGMatcher.create(srcContent, dstContent, srcTree, dstTree, mapping);
-		matcher.match();
-
+	// mappingとITreeからActionを計算
+	public List<Action> calculateEditScript(final ITree srcTree, final ITree dstTree, final MappingStore mapping){
 		final ActionGenerator generator = new ActionGenerator(srcTree, dstTree, mapping);
 		generator.generate();
-
 		return generator.getActions();
   	}
+	
+	// 既存のMatcherで計算したmappingを返すメソッド
+	public MappingStore calculateMapping_orginal(final ITree srcTree, final ITree dstTree){
+		final Matcher matcher = com.github.gumtreediff.matchers.Matchers
+	            .getInstance()
+	            .getMatcher(srcTree, dstTree);
+		matcher.match();
+		return matcher.getMappings();
+	}
+	
+	// LGMatcherで計算したmappingを返すメソッド
+	public MappingStore calculateMapping_LGMatcher(final ITree srcTree, final ITree dstTree, final String srcContent,
+													final String dstContent) {
+		MappingStore mapping = new MappingStore();
+		final Matcher matcher = LGMatcher.create(srcContent, dstContent, srcTree, dstTree, mapping);
+		matcher.match();
+		return mapping;
+	}
+	
+	private static ITree getITree(final String src) throws IOException {
+		return Generators.getInstance().getTree(src).getRoot();
+	}
 
 	private String readAll(final String path) throws IOException {
 		return Files.lines(Paths.get(path), Charset.forName("UTF-8"))

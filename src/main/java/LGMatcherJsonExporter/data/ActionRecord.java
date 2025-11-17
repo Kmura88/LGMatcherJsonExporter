@@ -5,34 +5,28 @@ import java.util.List;
 
 public class ActionRecord {
 
-    public static enum ActionType {
-        MOVE, INSERT, DELETE, UPDATE
-    }
-
-    private ActionType type;
     private List<RangeRecord> ranges;
 
-    public ActionRecord(ActionType type) {
-        this.type = type;
+    public ActionRecord() {
         this.ranges = new ArrayList<>();
-    }
-
-    public ActionType getType() {
-        return type;
     }
 
     public List<RangeRecord> getRanges() {
         return ranges;
     }
 
-    public void addRange(RangeRecord range) {
+    public void addRange(final RangeRecord range) {
         ranges.add(range);
+    }
+    
+    public void addRange(final int srcPos, final int srcEnd, final int dstPos, final int dstEnd) {
+        ranges.add(new RangeRecord(srcPos, srcEnd, dstPos, dstEnd));
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[type=").append(type).append(", ranges=");
+        sb.append("[ranges=");
         sb.append(ranges);
         sb.append("]");
         return sb.toString();

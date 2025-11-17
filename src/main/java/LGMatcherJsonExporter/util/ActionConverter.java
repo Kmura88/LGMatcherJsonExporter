@@ -7,9 +7,7 @@ import com.github.gumtreediff.actions.model.Action;
 import com.github.gumtreediff.matchers.MappingStore;
 import com.github.gumtreediff.tree.ITree;
 
-import LGMatcherJsonExporter.data.ActionRecord;
 import LGMatcherJsonExporter.data.ActionRecords;
-import LGMatcherJsonExporter.data.RangeRecord;
 
 public class ActionConverter {
 	
@@ -19,7 +17,6 @@ public class ActionConverter {
 
 	    for (Action i : actions) {
 
-	        ActionRecord.ActionType type = null;
 	        int srcPos = -1, srcEnd = -1;
 	        int dstPos = -1, dstEnd = -1;
 
@@ -27,7 +24,6 @@ public class ActionConverter {
 	        // Move
 	        // ---------------------------------
 	        if (i instanceof com.github.gumtreediff.actions.model.Move) {
-	            type = ActionRecord.ActionType.MOVE;
 	            ITree srcNode = i.getNode();
 	            ITree dstNode = mapping.getDst(srcNode);
 
@@ -37,34 +33,34 @@ public class ActionConverter {
 	                dstPos = dstNode.getPos();
 	                dstEnd = dstNode.getEndPos();
 	            }
-
+	            
+	            allRecords.move.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        // ---------------------------------
 	        // Insert
 	        // ---------------------------------
 	        } else if (i instanceof com.github.gumtreediff.actions.model.Insert) {
-	            type = ActionRecord.ActionType.INSERT;
 	            ITree dstNode = i.getNode();
 	            dstPos = dstNode.getPos();
 	            dstEnd = dstNode.getEndPos();
 	            srcPos = -1;
 	            srcEnd = -1;
-
+	            
+	            allRecords.insert.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        // ---------------------------------
 	        // Delete
 	        // ---------------------------------
 	        } else if (i instanceof com.github.gumtreediff.actions.model.Delete) {
-	            type = ActionRecord.ActionType.DELETE;
 	            ITree srcNode = i.getNode();
 	            srcPos = srcNode.getPos();
 	            srcEnd = srcNode.getEndPos();
 	            dstPos = -1;
 	            dstEnd = -1;
-
+	            
+	            allRecords.delete.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        // ---------------------------------
 	        // Update
 	        // ---------------------------------
 	        } else if (i instanceof com.github.gumtreediff.actions.model.Update) {
-	            type = ActionRecord.ActionType.UPDATE;
 	            ITree srcNode = i.getNode();
 	            ITree dstNode = mapping.getDst(srcNode);
 
@@ -80,28 +76,10 @@ public class ActionConverter {
 	                dstPos = -1;
 	                dstEnd = -1;
 	            }
-	        }
-
-	        if (type != null) {
-	            RangeRecord range = new RangeRecord(srcPos, srcEnd, dstPos, dstEnd);
-
-	            switch (type) {
-	                case MOVE:
-	                    allRecords.addMoveRange(range);
-	                    break;
-	                case INSERT:
-	                    allRecords.addInsertRange(range);
-	                    break;
-	                case DELETE:
-	                    allRecords.addDeleteRange(range);
-	                    break;
-	                case UPDATE:
-	                    allRecords.addUpdateRange(range);
-	                    break;
-	            }
+	            
+	            allRecords.update.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        }
 	    }
-
 	    return allRecords;
 	}
 	

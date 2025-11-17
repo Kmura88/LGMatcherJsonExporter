@@ -12,10 +12,10 @@ public class ActionRecordsJsonExporter {
     public static JSONObject toJson(ActionRecords records) {
         JSONObject root = new JSONObject();
 
-        root.put("INSERT", actionRecordToJson(records.getInsert()));
-        root.put("DELETE", actionRecordToJson(records.getDelete()));
-        root.put("UPDATE", actionRecordToJson(records.getUpdate()));
-        root.put("MOVE", actionRecordToJson(records.getMove()));
+        root.put("INSERT", actionRecordToJson(records.insert));
+        root.put("DELETE", actionRecordToJson(records.delete));
+        root.put("UPDATE", actionRecordToJson(records.update));
+        root.put("MOVE", actionRecordToJson(records.move));
 
         return root;
     }

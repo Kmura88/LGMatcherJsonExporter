@@ -37,7 +37,7 @@ eclipse上でパッケージを右クリック -> `プロパティ` -> `javaの�
 
 ### データ型
 - `ActionRecords`型が`ActionRecord`を4種類格納
-- `ActionRecord`はIDMUのタイプと`RangeRecord`の配列を格納
+- `ActionRecord`は`RangeRecord`の配列を格納
 - `RangeRecord`は`{src_pos, src_end, dst_pos, dst_end}`のデータ型
 	- src_pos は変更後ソースコードでのファイルの先頭からの文字数
 

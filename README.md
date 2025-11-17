@@ -5,6 +5,7 @@
 ___
 
 LGMatcherSampleを元に作成。
+JSON出力器だが内部の`ActionRecords`型は汎用的に利用できる。
 
 ## setup
 
@@ -31,6 +32,23 @@ java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 
 ## setup for Eclipse(もう不要)
 eclipse上でパッケージを右クリック -> `プロパティ` -> `javaのビルドパス` -> `プロジェクトタブ` -> LGMatcherを追加。
+
+<details> <summary> 処理メモ </summary>
+
+### データ型
+- `ActionRecords`型が`ActionRecord`を4種類格納
+- `ActionRecord`はIDMUのタイプと`RangeRecord`の配列を格納
+- `RangeRecord`は`{src_pos, src_end, dst_pos, dst_end}`のデータ型
+	- src_pos は変更後ソースコードでのファイルの先頭からの文字数
+
+### 処理
+1. `GumTreeRunner.run()`でGumTreeの`List<Action> actions`と`MappingStore`を生成
+	- `GumTreeRunner.setUseLGMatcher(false)`でLGMatcherを使わなくできる
+2. `ActionConverter.makeActionRecords(...)`で`ActionRecords`に変換
+3. `ActionRecordsJsonExporter.toJson(...)`で`JSONObject`に変換
+
+
+</details>
 
 <details> <summary> `update`の粒度の向上メモ </summary>
 

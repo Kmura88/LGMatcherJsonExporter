@@ -33,7 +33,7 @@ java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 ## how to use - In Java Project
 ```java
 GumTreeRunner GTR = new GumTreeRunner("./A.java","./B.java");
-GTR.setUseLGMatcher(Config.USE_LGMATCHER); //LGMatcherを使うか否か
+//GTR.setUseLGMatcher(false); //LGMatcherを使うか否か
 GTR.run();
 
 ActionRecords actionRecords = ActionConverter.makeActionRecords(GTR.getActions(), GTR.getmapping());

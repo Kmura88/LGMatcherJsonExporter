@@ -14,7 +14,7 @@ jdk17でのみコンパイル可能
 ./gradlew shadowJar
 ```
 
-## how to use 
+## how to use - CUI
 LGMatcherの計算方法で計算
 ```
 java -jar LGMatcherJsonExporter-1.0-all.jar [-LGM] [出力先ファイル名] [srcPath] [dstPath]
@@ -30,8 +30,16 @@ java -jar LGMatcherJsonExporter-1.0-all.jar [-M] [出力先ファイル名] [src
 java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 ```
 
-## setup for Eclipse(もう不要)
-eclipse上でパッケージを右クリック -> `プロパティ` -> `javaのビルドパス` -> `プロジェクトタブ` -> LGMatcherを追加。
+## how to use - In Java Project
+```java
+GumTreeRunner GTR = new GumTreeRunner("./A.java","./B.java");
+GTR.setUseLGMatcher(Config.USE_LGMATCHER); //LGMatcherを使うか否か
+GTR.run();
+
+ActionRecords actionRecords = ActionConverter.makeActionRecords(GTR.getActions(), GTR.getmapping());
+```
+
+
 
 <details> <summary> 処理メモ </summary>
 

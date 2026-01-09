@@ -1,11 +1,12 @@
 # LGMatcherJsonExporter
 
-[LGMatcher](https://github.com/kusumotolab/LGMatcher)を利用。
-`Gradle 4.10.3`(古い)が、新しいJavaではセキュリティ上禁止されている内部的な機能を使おうとして、Java側からブロックされていたため、GradleとJavaのバージョンは引き上げている。
+[LGMatcher](https://github.com/kusumotolab/LGMatcher)のソースコードを利用。
+`Gradle 4.10.3`(古い)が、新しいJavaではセキュリティ上禁止されている内部的な機能を使おうとして、Java側からブロックされていたため、GradleとJavaのバージョンは引き上げた。
 ___
 
 LGMatcherSampleを元に作成。
 JSON出力器だが内部の`ActionRecords`型は汎用的に利用できる。
+ファイルの先頭からの文字数を保管している．
 
 ## setup
 
@@ -31,6 +32,7 @@ java -jar LGMatcherJsonExporter-1.0-all.jar -LGM data.json ./A.java ./B.java
 ```
 
 ## how to use - In Java Project
+
 ```java
 GumTreeRunner GTR = new GumTreeRunner("./A.java","./B.java");
 //GTR.setUseLGMatcher(false); //LGMatcherを使うか否か
@@ -39,17 +41,52 @@ GTR.run();
 ActionRecords actionRecords = ActionConverter.makeActionRecords(GTR.getActions(), GTR.getmapping());
 ```
 
+## `ActionRecords`型について
+`ActionRecords`は`ActionRecord`のコンテナである．
+`ActionRecord`は`RangeRecord`のコンテナである．
+`RangeRecord`はファイルの先頭からの文字数を保管する．
 
+```mermaid
+classDiagram
+    %% メインのコンテナクラス
+    class ActionRecords {
+        +ActionRecord insert
+        +ActionRecord delete
+        +ActionRecord update
+        +ActionRecord move
+    }
+
+    %% リストを管理するラッパークラス
+    class ActionRecord {
+        -List~RangeRecord~ ranges
+        +addRange(RangeRecord)
+        +addRange(srcPos, srcEnd, dstPos, dstEnd)
+        +getRanges()
+    }
+
+    %% データの最小単位（座標情報）
+    class RangeRecord {
+        -int src_pos
+        -int src_end
+        -int dst_pos
+        -int dst_end
+        +getSrcPos()
+        +getDstPos()
+    }
+
+    %% 関係性の定義
+    %% ActionRecords は insert, delete, update, move という役割で ActionRecord を持つ
+    ActionRecords "1" *-- "1" ActionRecord : insert
+    ActionRecords "1" *-- "1" ActionRecord : delete
+    ActionRecords "1" *-- "1" ActionRecord : update
+    ActionRecords "1" *-- "1" ActionRecord : move
+
+    %% ActionRecord は 複数の RangeRecord を集約(リスト)している
+    ActionRecord "1" o-- "*" RangeRecord : contains (List)
+```
 
 <details> <summary> 処理メモ </summary>
 
-### データ型
-- `ActionRecords`型が`ActionRecord`を4種類格納
-- `ActionRecord`は`RangeRecord`の配列を格納
-- `RangeRecord`は`{src_pos, src_end, dst_pos, dst_end}`のデータ型
-	- src_pos は変更後ソースコードでのファイルの先頭からの文字数
-
-### 処理
 1. `GumTreeRunner.run()`でGumTreeの`List<Action> actions`と`MappingStore`を生成
 	- `GumTreeRunner.setUseLGMatcher(false)`でLGMatcherを使わなくできる
 2. `ActionConverter.makeActionRecords(...)`で`ActionRecords`に変換
@@ -61,12 +98,7 @@ ActionRecords actionRecords = ActionConverter.makeActionRecords(GTR.getActions()
 <details> <summary> `update`の粒度の向上メモ </summary>
 
 - `update`の粒度が粗いことがあった
-		- 例: `3 + 5`を`3 - 5`に変更すると変えたのは1文字なのに5文字書き換えた判定に
-	- `update`の粒度が粗いと内包・外包の判定に問題が生じる
-	- ~~`update`はASTの葉のノードであるべき~~
-	- ~~`Actions`に保管されるノードが、稀に、葉の親ノードになることがあった~~
-	- LGMatcherを外してGumTree生来のMatcherを利用しても変わらなかった
-		- GumTreeに問題があり
+	- 例: `3 + 5`を`3 - 5`に変更すると変えたのは1文字なのに5文字書き換えた判定に
 	- 原因 : InfixExpressionのような、子ノードを持つ&ノード自身に値を持つ ノードは、自身の文字数を子ノードの分まで含む。
 	```
 	Ifstatement

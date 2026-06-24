@@ -16,6 +16,7 @@ public class ActionRecordsJsonExporter {
         root.put("DELETE", actionRecordToJson(records.delete));
         root.put("UPDATE", actionRecordToJson(records.update));
         root.put("MOVE", actionRecordToJson(records.move));
+        root.put("MATCH",  actionRecordToJson(records.match));
 
         return root;
     }

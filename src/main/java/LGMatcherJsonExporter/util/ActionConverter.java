@@ -1,9 +1,12 @@
 package LGMatcherJsonExporter.util;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.gumtreediff.actions.model.Action;
+import com.github.gumtreediff.matchers.Mapping;
 import com.github.gumtreediff.matchers.MappingStore;
 import com.github.gumtreediff.tree.ITree;
 
@@ -14,6 +17,7 @@ public class ActionConverter {
 	public static ActionRecords makeActionRecords(final List<Action> actions, final MappingStore mapping) {
 
 	    ActionRecords allRecords = new ActionRecords();
+	    Set<ITree> movedOrUpdatedSrc = new HashSet<>();
 
 	    for (Action i : actions) {
 
@@ -34,6 +38,7 @@ public class ActionConverter {
 	                dstEnd = dstNode.getEndPos();
 	            }
 	            
+	            movedOrUpdatedSrc.add(srcNode);
 	            allRecords.move.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        // ---------------------------------
 	        // Insert
@@ -77,9 +82,32 @@ public class ActionConverter {
 	                dstEnd = -1;
 	            }
 	            
+	            movedOrUpdatedSrc.add(srcNode);
 	            allRecords.update.addRange(srcPos, srcEnd, dstPos, dstEnd);
 	        }
 	    }
+	    
+        // ---------------------------------
+        // Match
+        // MappingStore 内の全マッピングのうち
+        // Move / Update に使われていないペアが「変更なし」
+        // ---------------------------------
+        for (Mapping m : mapping.asSet()) {
+            ITree srcNode = m.first;
+            ITree dstNode = m.second;
+
+            if (movedOrUpdatedSrc.contains(srcNode)) {
+                continue; // Move or Update 済みなのでスキップ
+            }
+
+            int srcPos = srcNode.getPos();
+            int srcEnd = srcNode.getEndPos();
+            int dstPos = dstNode.getPos();
+            int dstEnd = dstNode.getEndPos();
+
+            allRecords.match.addRange(srcPos, srcEnd, dstPos, dstEnd);
+        }
+        
 	    return allRecords;
 	}
 	

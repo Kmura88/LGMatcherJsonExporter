@@ -6,6 +6,7 @@ public class ActionRecords {
     public ActionRecord delete = new ActionRecord();
     public ActionRecord update = new ActionRecord();
     public ActionRecord move   = new ActionRecord();
+    public ActionRecord match  = new ActionRecord();
 
     @Override
     public String toString() {
@@ -13,7 +14,8 @@ public class ActionRecords {
                 "INSERT=" + insert + ",\n" +
                 "DELETE=" + delete + ",\n" +
                 "UPDATE=" + update + ",\n" +
-                "MOVE=" + move + "\n" +
+                "MOVE="   + move   + ",\n" +
+                "MATCH="  + match  + "\n" +
                 "}";
     }
 }

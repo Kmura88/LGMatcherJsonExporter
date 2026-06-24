@@ -76,11 +76,12 @@ classDiagram
     }
 
     %% 関係性の定義
-    %% ActionRecords は insert, delete, update, move という役割で ActionRecord を持つ
+    %% ActionRecords は insert, delete, update, move, match という役割で ActionRecord を持つ
     ActionRecords "1" *-- "1" ActionRecord : insert
     ActionRecords "1" *-- "1" ActionRecord : delete
     ActionRecords "1" *-- "1" ActionRecord : update
     ActionRecords "1" *-- "1" ActionRecord : move
+	ActionRecords "1" *-- "1" ActionRecord : match
 
     %% ActionRecord は 複数の RangeRecord を集約(リスト)している
     ActionRecord "1" o-- "*" RangeRecord : contains (List)

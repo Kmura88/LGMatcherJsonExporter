@@ -54,6 +54,7 @@ classDiagram
         +ActionRecord delete
         +ActionRecord update
         +ActionRecord move
+		+ActionRecord match
     }
 
     %% リストを管理するラッパークラス

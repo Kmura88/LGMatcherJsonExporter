@@ -25,10 +25,10 @@ public class ActionRecordsJsonExporter {
         JSONArray arr = new JSONArray();
         for (RangeRecord range : record.getRanges()) {
             JSONObject obj = new JSONObject();
-            obj.put("src_pos", range.getSrcPos() >= 0 ? range.getSrcPos() : JSONObject.NULL);
-            obj.put("src_end", range.getSrcEnd() >= 0 ? range.getSrcEnd() : JSONObject.NULL);
-            obj.put("dst_pos", range.getDstPos() >= 0 ? range.getDstPos() : JSONObject.NULL);
-            obj.put("dst_end", range.getDstEnd() >= 0 ? range.getDstEnd() : JSONObject.NULL);
+            obj.put("src_pos", range.src_pos >= 0 ? range.src_pos : JSONObject.NULL);
+            obj.put("src_end", range.src_end >= 0 ? range.src_end : JSONObject.NULL);
+            obj.put("dst_pos", range.dst_pos >= 0 ? range.dst_pos : JSONObject.NULL);
+            obj.put("dst_end", range.dst_end >= 0 ? range.dst_end : JSONObject.NULL);
             arr.put(obj);
         }
         return arr;

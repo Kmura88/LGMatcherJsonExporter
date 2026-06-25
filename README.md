@@ -67,12 +67,10 @@ classDiagram
 
     %% データの最小単位（座標情報）
     class RangeRecord {
-        -int src_pos
-        -int src_end
-        -int dst_pos
-        -int dst_end
-        +getSrcPos()
-        +getDstPos()
+        +int src_pos
+        +int src_end
+        +int dst_pos
+        +int dst_end
     }
 
     %% 関係性の定義
